@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="updateInterval">
+        <item name="1">1%</item>
+        <item name="5">5%</item>
+        <item name="10">10%</item>
+        <item name="20">20%</item>
+        <item name="40">40%</item>
+        <item name="60">60%</item>
+        <item name="80">80%</item>
+        <item name="100">100%</item>
+    </string-array>
+    <string-array name="updateIntervalValues">
+        <item name="1">1</item>
+        <item name="5">5</item>
+        <item name="10">10</item>
+        <item name="20">20</item>
+        <item name="40">40</item>
+        <item name="60">60</item>
+        <item name="80">80</item>
+        <item name="100">100</item>
+    </string-array>
+
+    <string-array name="wakelockTypeValues">
+        <item name="full">full</item>
+        <item name="partial">partial</item>
+        <item name="dim">dim</item>
+    </string-array>
+    <string-array name="wakelockType">
+        <item name="full">Full Wakelock</item>
+        <item name="partial">Partial Wakelock</item>
+        <item name="dim">Screen Dim Wakelock</item>
+    </string-array>
+
+</resources>
