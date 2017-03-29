@@ -36,6 +36,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.util.Calendar;
@@ -56,6 +57,8 @@ public class ProgramService extends Service {
 	private boolean mediaSoundBool;
 	private boolean vibrateBool;
 	private float mediaSoundVolume;
+
+	private String lastTickerText;
 
 	private int totalTimeLeft;
 
@@ -421,6 +424,8 @@ public class ProgramService extends Service {
 				mp.start();
 			}
 
+			sendNotificationReal("Workout completed", "Workout completed.", true);
+
 			// let the user know we're done
 			// setup vibrator
 			vibrateBool = prefs.getBoolean("enable_vibrations", true);
@@ -618,16 +623,12 @@ public class ProgramService extends Service {
 	// ===========================================================
 	// Get a place in the notification bar and send a string
 	// For sending 'real' notifications (those which can be 'cleaned')
-	// from the bar, I'd suggest using 'sendNotification2()'
-	public void sendNotification(String tickerTxt, String s) {
+	// from the bar, I'd suggest using 'sendNotificationReal()'
+	public void sendNotification(String tickerText, String contentText) {
 		//int icon = nl.ttys0.simplec25k.R.drawable.nbarlogo;//runner
 		int icon = nl.ttys0.simplec25k.R.drawable.ic_launcher;
-		CharSequence tickerText = tickerTxt;
 
-		final Notification notification = new Notification(icon, tickerText,
-				System.currentTimeMillis());
 		CharSequence contentTitle = "Simple C25K";
-		CharSequence contentText = s;
 
 		// define the actions to perform when user touch the notification
 		Intent launchApp = new Intent(this, TimerActivity.class);
@@ -638,17 +639,31 @@ public class ProgramService extends Service {
 		PendingIntent launchNotification = PendingIntent.getActivity(
 				getApplicationContext(), 0, launchApp, 0);
 
-		notification.setLatestEventInfo(getApplicationContext(), contentTitle,
-				contentText, launchNotification);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+		builder.setSmallIcon(icon);
+		builder.setTicker(tickerText);
+		builder.setWhen(System.currentTimeMillis());
+		builder.setContentTitle(contentTitle);
+		builder.setContentText(contentText);
+		builder.setContentIntent(launchNotification);
+		final Notification notification = builder.build();
+
+		boolean vibrate = false;
+		if (! tickerText.equals(lastTickerText)) {
+			vibrate = true;
+			lastTickerText = tickerText;
+		}
+		sendNotificationReal(tickerText, contentText, vibrate);
 
 		startForeground(1337, notification);
 	}
 
 	// This method can be used to send a 'real' notification. This notification
 	// can be removed from the bar by the user by clicking them
+	// Additionally these notifications are shown on connected Wear-devices.
 	// There's a hardcoded id in here, so the can only be only one notification
 	// at the time.
-	public void sendNotification2() {
+	public void sendNotificationReal(String tickerText, String contentText, boolean vibrate) {
 
 		// Get a reference to the NotificationManager:
 		String ns = Context.NOTIFICATION_SERVICE;
@@ -656,25 +671,41 @@ public class ProgramService extends Service {
 
 		// Instantiate the Notification:
 		int icon = nl.ttys0.simplec25k.R.drawable.ic_launcher;
-		CharSequence tickerText = "Workout completed";
 		long when = System.currentTimeMillis();
 
-		Notification notification = new Notification(icon, tickerText, when);
 
 		// Define the notification's message and PendingIntent:
 		Context context = getApplicationContext();
 		CharSequence contentTitle = "Simple C25K";
-		CharSequence contentText = "Workout completed.";
 		Intent notificationIntent = new Intent(this, TimerActivity.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
 				notificationIntent, 0);
 
-		notification.setLatestEventInfo(context, contentTitle, contentText,
-				contentIntent);
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+		builder.setSmallIcon(icon);
+		builder.setTicker(tickerText);
+		builder.setWhen(System.currentTimeMillis());
+		builder.setContentTitle(contentTitle);
+		builder.setContentText(contentText);
+		builder.setContentIntent(contentIntent);
+		if (vibrate) {
+			builder.setVibrate(new long[]{0, 1000});
+			Log.e("VibrationMotor", "sendNotificationReal: VIBRATING");
+		}
+		final Notification notification = builder.build();
 
 		// Pass the Notification to the NotificationManager:
 		final int HELLO_ID = 1;
 		mNotificationManager.notify(HELLO_ID, notification);
+
+		if (vibrate) {
+			try {
+				// pause so that vibration is not interrupted by next notification
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
 	}
 
