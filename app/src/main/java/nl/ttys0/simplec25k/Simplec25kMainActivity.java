@@ -129,7 +129,7 @@ public class Simplec25kMainActivity extends ListActivity {
 			View row = inflater.inflate(R.layout.row, parent, false);
 			TextView label = (TextView) row.findViewById(R.id.label);
 			label.setText(programStringArr[position].replace("w", "Week ")
-					.replace("d", ", Day"));
+					.replace("d", ", Day "));
 
 			ImageView icon = (ImageView) row.findViewById(R.id.icon);
 
