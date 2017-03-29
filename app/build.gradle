@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 android {
-    compileSdkVersion 8
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 23
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         applicationId "nl.ttys0.simplec25k"
-        minSdkVersion 7
+        minSdkVersion 14
         targetSdkVersion 15
     }
 
